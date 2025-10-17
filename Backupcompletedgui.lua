@@ -265,6 +265,39 @@ do
             end
         end
     end)
+    -- Extra loadstring buttons
+    local lsBtn1 = makeButton(page, "Load: Fling V.1", UDim2.new(0,160,0,32), UDim2.new(1, -340, 0, 130), function()
+        local ok, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/miso517/scirpt/refs/heads/main/main.lua"))();
+        end)
+        if ok then
+            notify("Zuka Bot", "Fling V.1 loaded", 2)
+        else
+            notify("Zuka Bot", "Failed to load: " .. tostring(err), 4)
+        end
+    end)
+
+    local lsBtn2 = makeButton(page, "Load: Reach", UDim2.new(0,160,0,32), UDim2.new(1, -340, 0, 170), function()
+        local ok, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Anaszaxo555/Y/refs/heads/main/Y"))();
+        end)
+        if ok then
+            notify("Zuka Bot", "Reach Y loaded", 2)
+        else
+            notify("Zuka Bot", "Failed to load: " .. tostring(err), 4)
+        end
+    end)
+
+    local lsBtn3 = makeButton(page, "Load: Shit-talking AI", UDim2.new(0,160,0,32), UDim2.new(1, -340, 0, 210), function()
+        local ok, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/zukatech1/customluascripts/refs/heads/main/Broken.lua"))();
+        end)
+        if ok then
+            notify("Zuka Bot", "Best AI loaded", 2)
+        else
+            notify("Zuka Bot", "Failed to load: " .. tostring(err), 4)
+        end
+    end)
 end
 
 -- ========== Rage Bot Page ========== 
@@ -381,6 +414,122 @@ do
             hoverBox.Text = tostring(hoverDist)
         else
             hoverBox.Text = tostring(hoverDist)
+        end
+    end)
+
+    -- Auto-cycle UI: cycles through players automatically
+    local autoCycleToggle = Instance.new("TextButton", page)
+    autoCycleToggle.Size = UDim2.new(0, 180, 0, 28)
+    autoCycleToggle.Position = UDim2.new(0, 20, 0, 200)
+    autoCycleToggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    autoCycleToggle.TextColor3 = Color3.fromRGB(255,255,255)
+    autoCycleToggle.Font = Enum.Font.Code
+    autoCycleToggle.TextSize = 15
+    autoCycleToggle.Text = "Auto Cycle: OFF"
+    makeUICorner(autoCycleToggle, 6)
+
+    local ignoreForceToggle = Instance.new("TextButton", page)
+    ignoreForceToggle.Size = UDim2.new(0, 240, 0, 28)
+    ignoreForceToggle.Position = UDim2.new(0, 220, 0, 200)
+    ignoreForceToggle.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    ignoreForceToggle.TextColor3 = Color3.fromRGB(255,255,255)
+    ignoreForceToggle.Font = Enum.Font.Code
+    ignoreForceToggle.TextSize = 15
+    ignoreForceToggle.Text = "Ignore players with spawn force field: OFF"
+    makeUICorner(ignoreForceToggle, 6)
+
+    local intervalLabel = Instance.new("TextLabel", page)
+    intervalLabel.Size = UDim2.new(0, 120, 0, 22)
+    intervalLabel.Position = UDim2.new(0, 20, 0, 236)
+    intervalLabel.BackgroundTransparency = 1
+    intervalLabel.Text = "Cycle Interval (s):"
+    intervalLabel.TextColor3 = Color3.fromRGB(255,180,180)
+    intervalLabel.Font = Enum.Font.Code
+    intervalLabel.TextSize = 15
+    intervalLabel.TextXAlignment = Enum.TextXAlignment.Left
+    intervalLabel.TextYAlignment = Enum.TextYAlignment.Center
+
+    local intervalBox = Instance.new("TextBox", page)
+    intervalBox.Size = UDim2.new(0, 80, 0, 22)
+    intervalBox.Position = UDim2.new(0, 140, 0, 236)
+    intervalBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    intervalBox.TextColor3 = Color3.fromRGB(255,255,255)
+    intervalBox.Font = Enum.Font.Code
+    intervalBox.TextSize = 15
+    intervalBox.Text = "4"
+    intervalBox.PlaceholderText = "Seconds"
+    makeUICorner(intervalBox, 6)
+
+    local autoCycleEnabled = false
+    local ignoreSpawnForce = false
+    local cycleInterval = 4
+
+    autoCycleToggle.MouseButton1Click:Connect(function()
+        autoCycleEnabled = not autoCycleEnabled
+        autoCycleToggle.Text = "Auto Cycle: " .. (autoCycleEnabled and "ON" or "OFF")
+    end)
+
+    ignoreForceToggle.MouseButton1Click:Connect(function()
+        ignoreSpawnForce = not ignoreSpawnForce
+        ignoreForceToggle.Text = "Ignore players with spawn force field: " .. (ignoreSpawnForce and "ON" or "OFF")
+    end)
+
+    intervalBox.FocusLost:Connect(function()
+        local v = tonumber(intervalBox.Text)
+        if v and v >= 0.5 and v <= 60 then
+            cycleInterval = v
+            intervalBox.Text = tostring(cycleInterval)
+        else
+            intervalBox.Text = tostring(cycleInterval)
+        end
+    end)
+
+    -- Force-object classes to detect spawn force fields
+    local spawnForceClasses = {"BodyVelocity","BodyForce","BodyGyro","BodyAngularVelocity","VectorForce","AlignPosition","AlignOrientation","LinearVelocity","AngularVelocity"}
+
+    local function playerHasSpawnForce(plr)
+        if not plr or not plr.Character then return false end
+        for _, obj in ipairs(plr.Character:GetDescendants()) do
+            if table.find(spawnForceClasses, obj.ClassName) then
+                return true
+            end
+        end
+        return false
+    end
+
+    -- Cycling state
+    local cycleElapsed = 0
+    RunService.Heartbeat:Connect(function(dt)
+        if not autoCycleEnabled then return end
+        cycleElapsed = cycleElapsed + dt
+        if cycleElapsed < cycleInterval then return end
+        cycleElapsed = 0
+        -- build list of valid players
+        local players = Players:GetPlayers()
+        if #players <= 1 then return end
+        -- find index of current selectedPlayer in players list
+        local startIdx = 1
+        for i, plr in ipairs(players) do
+            if selectedPlayer and plr == selectedPlayer then startIdx = i break end
+        end
+        -- iterate to next valid player
+        local found = nil
+        local idx = startIdx
+        for i = 1, #players - 1 do
+            idx = idx + 1
+            if idx > #players then idx = 1 end
+            local cand = players[idx]
+            if cand ~= LocalPlayer then
+                if ignoreSpawnForce then
+                    if not playerHasSpawnForce(cand) then found = cand break end
+                else
+                    found = cand break
+                end
+            end
+        end
+        if found then
+            selectedPlayer = found
+            playerDropdown.Text = selectedPlayer and ("Select Player: "..selectedPlayer.Name) or "Select Player"
         end
     end)
 
@@ -797,7 +946,7 @@ do
     UIS.InputBegan:Connect(function(input, processed)
         if processed then return end
         local key = toggleKeyBox.Text:upper()
-        if key == "MOUSEBUTTON3" then
+        if key == "MOUSEBUTTON2" then
             if input.UserInputType == Enum.UserInputType.MouseButton3 then
                 aiming = true
             end
@@ -809,7 +958,7 @@ do
     end)
     UIS.InputEnded:Connect(function(input, processed)
         local key = toggleKeyBox.Text:upper()
-        if key == "MOUSEBUTTON3" then
+        if key == "MOUSEBUTTON2" then
             if input.UserInputType == Enum.UserInputType.MouseButton3 then
                 aiming = false
                 clearESP()
@@ -1158,7 +1307,7 @@ do
     local scripts = {
         {name = "Chat Bypasser", url = "https://raw.githubusercontent.com/shadow62x/catbypass/main/upfix"},
         {name = "Script Searcher", url = "https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/ScriptSearcher"},
-    {name = "AI Bot", url = "https://raw.githubusercontent.com/paulinelisenbe/luaprojects/refs/heads/main/AICHAT.lua"},
+    {name = "Auto Click", url = "https://raw.githubusercontent.com/JustEzpi/ROBLOX-Scripts/refs/heads/main/ROBLOX_AutoClicker"},
         {name = "CHedHub V1", url = "https://raw.githubusercontent.com/idcgj36/CHedHub/refs/heads/main/Hub"},
     }
 

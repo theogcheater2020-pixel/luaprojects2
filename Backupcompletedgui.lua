@@ -265,39 +265,6 @@ do
             end
         end
     end)
-    -- Extra loadstring buttons
-    local lsBtn1 = makeButton(page, "Load: Fling V.1", UDim2.new(0,160,0,32), UDim2.new(1, -340, 0, 130), function()
-        local ok, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/miso517/scirpt/refs/heads/main/main.lua"))();
-        end)
-        if ok then
-            notify("Zuka Bot", "Fling V.1 loaded", 2)
-        else
-            notify("Zuka Bot", "Failed to load: " .. tostring(err), 4)
-        end
-    end)
-
-    local lsBtn2 = makeButton(page, "Load: Reach", UDim2.new(0,160,0,32), UDim2.new(1, -340, 0, 170), function()
-        local ok, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Anaszaxo555/Y/refs/heads/main/Y"))();
-        end)
-        if ok then
-            notify("Zuka Bot", "Reach Y loaded", 2)
-        else
-            notify("Zuka Bot", "Failed to load: " .. tostring(err), 4)
-        end
-    end)
-
-    local lsBtn3 = makeButton(page, "Load: Shit-talking AI", UDim2.new(0,160,0,32), UDim2.new(1, -340, 0, 210), function()
-        local ok, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/zukatech1/customluascripts/refs/heads/main/Broken.lua"))();
-        end)
-        if ok then
-            notify("Zuka Bot", "Best AI loaded", 2)
-        else
-            notify("Zuka Bot", "Failed to load: " .. tostring(err), 4)
-        end
-    end)
 end
 
 -- ========== Rage Bot Page ========== 
@@ -1307,7 +1274,7 @@ do
     local scripts = {
         {name = "Chat Bypasser", url = "https://raw.githubusercontent.com/shadow62x/catbypass/main/upfix"},
         {name = "Script Searcher", url = "https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/ScriptSearcher"},
-    {name = "Auto Click", url = "https://raw.githubusercontent.com/JustEzpi/ROBLOX-Scripts/refs/heads/main/ROBLOX_AutoClicker"},
+    {name = "Auto Click", url = "https://raw.githubusercontent.com/theogcheater2020-pixel/luaprojects2/refs/heads/main/chat.lua"},
         {name = "CHedHub V1", url = "https://raw.githubusercontent.com/idcgj36/CHedHub/refs/heads/main/Hub"},
     }
 
